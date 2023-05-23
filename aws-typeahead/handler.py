@@ -66,9 +66,10 @@ def lambda_handler(event, context):
     logging.debug(f"Search key: {search_key}")
 
     #results = search_data('cryptos.json', search_key, search_value)
+    # Perform partial search on coin name
     found_coins = []
     for coin_data in data["Data"].values():
-        if coin_data["CoinName"] == search_value:
+        if coin_data["CoinName"].lower().startswith(search_value.lower()):
             found_coins.append(coin_data)
 
     # Print the found coins
@@ -76,10 +77,6 @@ def lambda_handler(event, context):
         print(f"Coin Name: {coin['CoinName']}")
         print(f"Symbol: {coin['Symbol']}")
         print()  # Print a new line between each coin
-    # Print search results
-    logging.info(f"Search results for {search_key} = {search_value}:")
-   # for result in results:
-   #     logging.info(result)
 
     logging.info("Lambda function execution completed.")
 
