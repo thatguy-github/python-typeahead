@@ -73,10 +73,25 @@ def lambda_handler(event, context):
             found_coins.append(coin_data)
 
     # Print the found coins
-    for coin in found_coins:
-        print(f"Coin Name: {coin['CoinName']}")
-        print(f"Symbol: {coin['Symbol']}")
-        print()  # Print a new line between each coin
 
-    logging.info("Lambda function execution completed.")
+
+    # Create a list to store the coin information
+    coin_list = []
+
+    # Build the coin list
+    for coin in found_coins:
+        coin_info = {
+            "Coin Name": coin["CoinName"],
+            "Symbol": coin["Symbol"]
+        }
+        coin_list.append(coin_info)
+
+    # Convert the coin list to JSON
+    json_data = json.dumps(coin_list, indent=4)
+
+    # Print the JSON object
+    print(json_data)
+
+
+logging.info("Lambda function execution completed.")
 
