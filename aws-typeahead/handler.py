@@ -13,42 +13,38 @@ logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
 
-# Search data in JSON file
-def search_data(filename, key, value):
-    with open(filename) as file:
-        data = json.load(file)
-    results = [item for item in data if item.get(key) == value]
-    return results
-
-# Save data to a JSON file
-
-
-url = "https://www.cryptocompare.com/api/data/coinlist"
-
-# Send a GET request to the URL
-response = requests.get(url)
-
-# Check if the request was successful (status code 200)
-if response.status_code == 200:
-    # Access the response data (assuming it's in JSON format)
-    data = response.json()
-
-    # Save data to a JSON file
-    with open('cryptos.json', 'w') as json_file:
-        json.dump(data, json_file)
-
-    logging.info("Data saved to cryptos.json")
-
-    # Example: Print the first coin's information
-    # first_coin = next(iter(data["Data"].values()))
-    # print(f"Coin Name: {first_coin['CoinName']}")
-    # print(f"Symbol: {first_coin['Symbol']}")
-else:
-    print(f"Request failed with status code: {response.status_code}")
-
-
 def lambda_handler(event, context):
     logging.info("Lambda function invoked.")
+
+
+    url = "https://www.cryptocompare.com/api/data/coinlist"
+
+    # Send a GET request to the URL
+    response = requests.get(url)
+
+    # Check if the request was successful (status code 200)
+    if response.status_code == 200:
+        # Access the response data (assuming it's in JSON format)
+        data = response.json()
+
+        logging.info("Data loaded")
+
+        # Example: Print the first coin's information
+        # first_coin = next(iter(data["Data"].values()))
+        # print(f"Coin Name: {first_coin['CoinName']}")
+        # print(f"Symbol: {first_coin['Symbol']}")
+    else:
+        # Construct the response dictionary
+        lambda_response = {
+            "statusCode": 500,
+            "headers": {
+                "Content-Type": "application/json"
+            },
+            "body": {"message": "bruh"}
+        }
+        # Return the response dictionary
+        return lambda_response
+
 
     # Parse the JSON payload
     if isinstance(event, str):
@@ -65,7 +61,6 @@ def lambda_handler(event, context):
     search_key = 'name'
     logging.debug(f"Search key: {search_key}")
 
-    #results = search_data('cryptos.json', search_key, search_value)
     # Perform partial search on coin name
     found_coins = []
     for coin_data in data["Data"].values():
@@ -86,12 +81,19 @@ def lambda_handler(event, context):
         }
         coin_list.append(coin_info)
 
-    # Convert the coin list to JSON
-    json_data = json.dumps(coin_list, indent=4)
 
-    # Print the JSON object
-    print(json_data)
 
+    # Construct the response dictionary
+    lambda_response = {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": json.dumps(coin_list, indent=4)
+    }
+
+    # Return the response dictionary
+    return lambda_response
 
 logging.info("Lambda function execution completed.")
 
