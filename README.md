@@ -22,7 +22,7 @@ serverless invoke local --function lambda_handler
 or 
 
 ```
-echo '{"body": {"name": "Bitcoin"}}' | serverless invoke local --function lambda_handler 
+echo '{"queryStringParameters": {"name": "Bitcoin"}}' | serverless invoke local --function lambda_handler 
 
 ```
 

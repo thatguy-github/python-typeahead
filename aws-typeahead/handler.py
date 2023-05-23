@@ -51,7 +51,7 @@ def lambda_handler(event, context):
         event = json.loads(event)  # Parse the event string into a dictionary
 
     body = event.get("body", {})
-    payload = json.dumps(body)  # Convert the payload dictionary to a JSON string
+    body = event.get("queryStringParameters", {})
 
     # Define the ticker symbol for item we want to get or default to bitcoin
     search_value = json.loads(payload).get("name", "Bitcoin")
