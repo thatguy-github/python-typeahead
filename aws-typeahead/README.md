@@ -22,7 +22,8 @@ serverless invoke local --function lambda_handler
 or 
 
 ```
-serverless invoke local --data '{"body": "{\"ticker\":\"BTC-USD\"\n}"}' --function lambda_handler
+serverless invoke local --data '{"body": "{\"name\":\"Bitcoin\"\n}"}' --function lambda_handler
+serverless invoke local --data "{\"body\":\"{\"name\":\"Bitcoin\"}\"}" --function lambda_handler
 ```
 
 # Deploy to Lambda

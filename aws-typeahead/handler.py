@@ -49,9 +49,18 @@ def search_data(filename, key, value):
 save_data('cryptos.json', data)
 
 def lambda_handler(event, context):
+
+
+    # Parse the JSON payload
+    body = event.get("body", "{}")
+    payload = json.loads(body)
+
+    # Define the ticker symbol for item we want to get or default to bitcoin
+    search_value = payload.get("name", "Bitcoin")
+
     # Search data in JSON file
-    search_key = 'symbol'
-    search_value = 'ETH'
+    search_key = 'name'
+
     results = search_data('cryptos.json', search_key, search_value)
 
     # Print search results
