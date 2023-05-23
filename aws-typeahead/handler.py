@@ -1,6 +1,8 @@
 import json
 import logging
 import sys
+import requests
+
 
 # Set up logging configuration
 logger = logging.getLogger()
@@ -11,44 +13,6 @@ logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
 
-# Create sample cryptocurrency data
-data = [
-    {
-        "name": "Bitcoin",
-        "symbol": "BTC",
-        "price": 45000.00,
-        "market_cap": 842000000000,
-        "volume": 18300000000
-    },
-    {
-        "name": "Ethereum",
-        "symbol": "ETH",
-        "price": 3500.00,
-        "market_cap": 400000000000,
-        "volume": 10000000000
-    },
-    {
-        "name": "Ripple",
-        "symbol": "XRP",
-        "price": 1.00,
-        "market_cap": 50000000000,
-        "volume": 2000000000
-    },
-    {
-        "name": "Litecoin",
-        "symbol": "LTC",
-        "price": 180.00,
-        "market_cap": 10000000000,
-        "volume": 500000000
-    }
-]
-
-# Save data to a JSON file
-def save_data(filename, data):
-    with open(filename, 'w') as file:
-        json.dump(data, file, indent=4)
-    logging.debug(f"Data saved to {filename}")
-
 # Search data in JSON file
 def search_data(filename, key, value):
     with open(filename) as file:
@@ -57,9 +21,31 @@ def search_data(filename, key, value):
     return results
 
 # Save data to a JSON file
-save_data('cryptos.json', data)
 
-logging.info("started.")
+
+url = "https://www.cryptocompare.com/api/data/coinlist"
+
+# Send a GET request to the URL
+response = requests.get(url)
+
+# Check if the request was successful (status code 200)
+if response.status_code == 200:
+    # Access the response data (assuming it's in JSON format)
+    data = response.json()
+
+    # Save data to a JSON file
+    with open('cryptos.json', 'w') as json_file:
+        json.dump(data, json_file)
+
+    logging.info("Data saved to cryptos.json")
+
+    # Example: Print the first coin's information
+    # first_coin = next(iter(data["Data"].values()))
+    # print(f"Coin Name: {first_coin['CoinName']}")
+    # print(f"Symbol: {first_coin['Symbol']}")
+else:
+    print(f"Request failed with status code: {response.status_code}")
+
 
 def lambda_handler(event, context):
     logging.info("Lambda function invoked.")
@@ -79,12 +65,21 @@ def lambda_handler(event, context):
     search_key = 'name'
     logging.debug(f"Search key: {search_key}")
 
-    results = search_data('cryptos.json', search_key, search_value)
+    #results = search_data('cryptos.json', search_key, search_value)
+    found_coins = []
+    for coin_data in data["Data"].values():
+        if coin_data["CoinName"] == search_value:
+            found_coins.append(coin_data)
 
+    # Print the found coins
+    for coin in found_coins:
+        print(f"Coin Name: {coin['CoinName']}")
+        print(f"Symbol: {coin['Symbol']}")
+        print()  # Print a new line between each coin
     # Print search results
     logging.info(f"Search results for {search_key} = {search_value}:")
-    for result in results:
-        logging.info(result)
+   # for result in results:
+   #     logging.info(result)
 
     logging.info("Lambda function execution completed.")
 
