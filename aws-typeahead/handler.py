@@ -1,4 +1,15 @@
 import json
+import logging
+import sys
+
+# Set up logging configuration
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+handler.setLevel(logging.INFO)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 
 # Create sample cryptocurrency data
 data = [
@@ -36,7 +47,7 @@ data = [
 def save_data(filename, data):
     with open(filename, 'w') as file:
         json.dump(data, file, indent=4)
-    print(f"Data saved to {filename}")
+    logging.debug(f"Data saved to {filename}")
 
 # Search data in JSON file
 def search_data(filename, key, value):
@@ -48,22 +59,32 @@ def search_data(filename, key, value):
 # Save data to a JSON file
 save_data('cryptos.json', data)
 
-def lambda_handler(event, context):
+logging.info("started.")
 
+def lambda_handler(event, context):
+    logging.info("Lambda function invoked.")
 
     # Parse the JSON payload
-    body = event.get("body", "{}")
-    payload = json.loads(body)
+    if isinstance(event, str):
+        event = json.loads(event)  # Parse the event string into a dictionary
+
+    body = event.get("body", {})
+    payload = json.dumps(body)  # Convert the payload dictionary to a JSON string
 
     # Define the ticker symbol for item we want to get or default to bitcoin
-    search_value = payload.get("name", "Bitcoin")
+    search_value = json.loads(payload).get("name", "Bitcoin")
+    logging.debug(f"Search value: {search_value}")
 
     # Search data in JSON file
     search_key = 'name'
+    logging.debug(f"Search key: {search_key}")
 
     results = search_data('cryptos.json', search_key, search_value)
 
     # Print search results
-    print(f"Search results for {search_key} = {search_value}:")
+    logging.info(f"Search results for {search_key} = {search_value}:")
     for result in results:
-        print(result)
+        logging.info(result)
+
+    logging.info("Lambda function execution completed.")
+
